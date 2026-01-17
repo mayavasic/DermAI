@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermAI - Diagnostic Cutané Intelligent</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0; 
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Palette de couleurs raffinée */
+            --primary: #0A2F3D;
+            --primary-light: #15455A;
+            --accent: #00D9C0;
+            --accent-glow: rgba(0, 217, 192, 0.3);
+            --secondary: #FF6B9D;
+            --bg-primary: #FAFBFC;
+            --bg-secondary: #F0F4F8;
+            --text-primary: #1A2332;
+            --text-secondary: #5B6B7A;
+            --text-light: #8B98A6;
+            --white: #FFFFFF;
+            --shadow-sm: 0 2px 8px rgba(10, 47, 61, 0.06);
+            --shadow-md: 0 8px 24px rgba(10, 47, 61, 0.12);
+            --shadow-lg: 0 16px 48px rgba(10, 47, 61, 0.18);
+            --shadow-accent: 0 8px 32px rgba(0, 217, 192, 0.25);
+            
+            /* Typography */
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'DM Sans', sans-serif;
+            --font-tech: 'Space Grotesk', sans-serif;
+            
+            /* Spacing */
+            --spacing-unit: 8px;
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 32px;
+            --radius-xl: 48px;
+        }
+
+        /* Animations globales */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+            50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-glow); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Curseur personnalisé */
+        * {
+            cursor: default;
+        }
+
+        a, button, input[type="file"] + label {
+            cursor: pointer;
+        }
+
+        /* Header moderne avec glassmorphism */
+        header {
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(250, 251, 252, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(10, 47, 61, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled {
+            background: rgba(250, 251, 252, 0.95);
+            box-shadow: var(--shadow-md);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        section {
+            scroll-margin-top: 100px;
+        }
+
+        .navbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: var(--shadow-accent);
+            animation: pulse-glow 3s infinite;
+        }
+
+        .logo-text {
+            font-family: var(--font-tech);
+            font-size: 35px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text .ai-gradient {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: calc(var(--spacing-unit) * 1);
+            list-style: none;
+        }
+
+        .nav-link {
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            font-size: 19px;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 24px;
+            right: 24px;
+            height: 4px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        #menu-open-button,
+        #menu-close-button {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        /* Hero Section avec gradient animé */
+        .hero-section {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 217, 192, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 107, 157, 0.15) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: calc(var(--spacing-unit) * 15) calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 8);
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: calc(var(--spacing-unit) * 10);
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(48px, 7vw, 72px);
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease-out 0.3s backwards;
+        }
+
+        .hero-title .gradient-text {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 2.5vw, 24px);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            font-weight: 500;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.5s backwards;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.6s backwards;
+        }
+
+        .btn-primary {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: var(--white);
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-accent);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 217, 192, 0.4);
+        }
+
+        .btn-secondary {
+            padding: 18px 40px;
+            background: transparent;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
+        }
+
+        .hero-image-container {
+            position: relative;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image-container:hover {
+            transform: scale(1.02);
+        }
+
+        .hero-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: var(--radius-xl);
+        }
+
+        .hero-image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 217, 192, 0.2), rgba(255, 107, 157, 0.2));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .hero-image-container:hover .hero-image-overlay {
+            opacity: 1;
+        }
+
+        /* Floating stats */
+        .hero-stat {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px 28px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-stat:nth-child(1) {
+            top: 10%;
+            right: -10%;
+            animation-delay: 0s;
+        }
+
+        .hero-stat:nth-child(2) {
+            bottom: 15%;
+            left: -10%;
+            animation-delay: 1s;
+        }
+
+        .hero-stat-value {
+            font-family: var(--font-tech);
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Section commune */
+        .section {
+            padding: calc(var(--spacing-unit) * 15) calc(var(--spacing-unit) * 4);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: calc(var(--spacing-unit) * 10);
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, rgba(0, 217, 192, 0.1), rgba(255, 107, 157, 0.1));
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 217, 192, 0.2);
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .section-description {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* About Section avec design en carte */
+        .about-section {
+            background: var(--bg-secondary);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: calc(var(--spacing-unit) * 8);
+            align-items: center;
+        }
+
+        .about-image-wrapper {
+            position: relative;
+        }
+
+        .about-image-main {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .about-image-decoration {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 3px solid var(--accent);
+            border-radius: var(--radius-lg);
+            top: -20px;
+            left: -20px;
+            z-index: -1;
+        }
+
+        .about-text h3 {
+            font-family: var(--font-display);
+            font-size: 36px;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+
+        .about-text p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: start;
+            gap: 16px;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+
+        .feature-text h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .feature-text p {
+            font-size: 14px;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* Diagnostic Section - Version premium */
+        .diagnostic-section {
+            background: var(--white);
+        }
+
+        .diagnostic-container {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            padding: calc(var(--spacing-unit) * 8);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: calc(var(--spacing-unit) * 8);
+            border: 1px solid rgba(10, 47, 61, 0.08);
+        }
+
+        .upload-column h2 {
+            font-family: var(--font-tech);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .upload-column h2 .gradient-text {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .upload-area {
+            position: relative;
+            border: none;
+            border-radius: var(--radius-lg);
+            padding: 60px 40px;
+            text-align: center;
+            background: transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 24px;
+            height: 400px; /* Fixez une hauteur confortable */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: transparent;
+            transform: translateY(-4px);
+        }
+
+        .upload-area.hidden {
+            display: none;
+        }
+
+        .upload-icon {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 100px;
+            box-shadow: var(--shadow-accent);
+        }
+
+        .upload-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        #preview-container {
+            margin: 24px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        #preview-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 50%;
+            display: none;
+            box-shadow: var(--shadow-lg);
+            border: 4px solid var(--accent);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: -200px;
+            
+        }
+
+        .btn-change {
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--primary);
+            font-weight: 600;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+            font-size: 22px;
+            gap: 15px;
+        }
+
+        .btn-change:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-analyze {
+            padding: 20px 45px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: var(--white);
+            font-weight: 700;
+            border: none;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-accent);
+            transition: all 0.3s ease;
+            gap: 15px;
+            font-size: 22px;
+            
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 217, 192, 0.4);
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Results Column */
+        .results-column {
+            padding-top: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-chart-wrapper {
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .donut-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--accent) 0deg calc(var(--percentage) * 3.6deg),
+                #E8F5F3 calc(var(--percentage) * 3.6deg) 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.5s ease;
+            position: relative;
+        }
+
+        .donut-chart::before {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            background: var(--white);
+            border-radius: 50%;
+        }
+
+        .percentage-display {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-tech);
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 24px;
+            box-shadow: var(--shadow-accent);
+            animation: pulse-glow 3s infinite;
+        }
+
+        .badge-asterisk {
+        text-align: center;
+        font-size: 60px;
+        font-weight: bold;
+        color: white; /* Ou la couleur de votre icône */
+        margin-top: 15px; /* Pour le remonter un peu par rapport à l'icône */
+    }
+        .result-bar-container {
+            width: 100%;
+            margin: 40px 0;
+            position: relative;
+            margin-top: 50px;
+        }
+
+        .arrow-indicator {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .arrow-value {
+            background: var(--primary);
+            color: var(--white);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-family: var(--font-tech);
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 8px;
+            white-space: nowrap;
+        }
+
+        .arrow-triangle {
+            width: 0;
+            height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-top: 16px solid var(--primary);
+            filter: drop-shadow(0 4px 8px rgba(10, 47, 61, 0.2));
+        }
+
+        .result-bar {
+            height: 50px;
+            background: linear-gradient(to right, 
+                #7DD8C7 0%, 
+                var(--accent) 30%, 
+                #FFB8CC 70%, 
+                var(--secondary) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            box-shadow: 0 8px 32px var(--accent-glow); /* C'est le même effet que les boutons */
+            position: relative;
+            overflow: hidden;
+        }
+
+            .probability-label {
+            margin-top: 15px; /* Espace sous la barre */
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary); /* Gris bleuté */
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .result-bar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 20s infinite;
+        }
+
+        .result-label {
+            font-family: var(--font-tech);
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--white);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .result-disclaimer {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border-radius: var(--radius-md);
+            border-left: 4px solid #FFB800;
+            margin-top: 32px;
+        }
+
+        .result-disclaimer p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Conseils Section */
+        .conseils-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            position: relative;
+            overflow: hidden;
+            
+        }
+
+        .conseils-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 80% 20%, rgba(0, 217, 192, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 157, 0.1) 0%, transparent 50%);
+        }
+
+        .conseils-section .section-title,
+        .conseils-section .section-description {
+            color: var(--white);
+        }
+
+        .conseils-section .section-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .conseils-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: calc(var(--spacing-unit) * 4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .conseil-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .conseil-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .conseil-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-accent);
+        }
+
+        .conseil-card h3 {
+            font-family: var(--font-tech);
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 16px;
+        }
+
+        .conseil-card p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        /* Technology Section */
+        .technology-section {
+            background: var(--bg-secondary);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: calc(var(--spacing-unit) * 5);
+        }
+
+        .tech-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(10, 47, 61, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tech-card-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .tech-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 32px;
+            box-shadow: var(--shadow-accent);
+        }
+
+        .tech-card h3 {
+            font-family: var(--font-tech);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .tech-card p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .tech-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tech-features li {
+            padding: 12px 0;
+            padding-left: 32px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .tech-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: var(--white);
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-form {
+            background: var(--bg-secondary);
+            padding: calc(var(--spacing-unit) * 6);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(10, 47, 61, 0.1);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 16px;
+            background: var(--white);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(0, 217, 192, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: var(--white);
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-accent);
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 217, 192, 0.4);
+        }
+
+        .contact-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: calc(var(--spacing-unit) * 4);
+            margin-top: calc(var(--spacing-unit) * 6);
+        }
+
+        .contact-info-item {
+            text-align: center;
+        }
+
+        .contact-info-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 24px;
+            box-shadow: var(--shadow-accent);
+        }
+
+        .contact-info-item h4 {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .contact-info-item p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: var(--white);
+            padding: calc(var(--spacing-unit) * 6) calc(var(--spacing-unit) * 4);
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: var(--font-tech);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .footer-logo .gradient-text {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content,
+            .about-content,
+            .diagnostic-container {
+                grid-template-columns: 1fr;
+                gap: calc(var(--spacing-unit) * 6);
+            }
+
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-stat {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                width: 300px;
+                height: 100vh;
+                background: var(--white);
+                flex-direction: column;
+                padding: 100px 40px;
+                box-shadow: var(--shadow-lg);
+                transition: left 0.3s ease;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-link {
+                color: var(--primary);
+                font-size: 18px;
+            }
+
+            #menu-open-button,
+            #menu-close-button {
+                display: block;
+            }
+
+            #menu-close-button {
+                position: absolute;
+                top: 40px;
+                right: 40px;
+            }
+
+            .contact-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <nav class="navbar">
+            <a href="#home" class="nav-logo">
+                <div class="logo-icon">🔬</div>
+                <div class="logo-text">Derm<span class="ai-gradient">AI</span></div>
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <button id="menu-close-button"><i class="fas fa-times"></i></button>
+                <li><a href="#home" class="nav-link">Accueil</a></li>
+                <li><a href="#about" class="nav-link">À Propos</a></li>
+                <li><a href="#diagnostic" class="nav-link">Diagnostic</a></li>
+                <li><a href="#conseils" class="nav-link">Conseils</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <button id="menu-open-button"><i class="fas fa-bars"></i></button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section" id="home">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Diagnostic cutané <span class="gradient-text">intelligent</span>
+                    </h1>
+                    <p class="hero-subtitle">Une analyse rapide et fiable pour votre tranquillité d'esprit</p>
+                    <p class="hero-description">
+                        Notre algorithme d'intelligence artificielle analyse vos lésions cutanées en quelques secondes, 
+                        vous offrant une première évaluation basée sur des milliers de cas médicaux.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#diagnostic" class="btn-primary">
+                            Commencer l'analyse
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <a href="#about" class="btn-secondary">
+                            En savoir plus
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-image-wrapper">
+                    <div class="hero-image-container">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=600&fit=crop" 
+                             alt="Consultation médicale" class="hero-image">
+                        <div class="hero-image-overlay"></div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">89%</div>
+                        <div class="hero-stat-label">Précision</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section section" id="about">
+            <div class="section-header">
+                <div class="section-badge">Notre Mission</div>
+                <h2 class="section-title">Une technologie au service de votre santé</h2>
+                <p class="section-description">
+                    DermAI utilise l'intelligence artificielle pour rendre 
+                    le diagnostic préliminaire accessible à tous.
+                </p>
+            </div>
+            <div class="about-content">
+                <div class="about-image-wrapper">
+                    <div class="about-image-decoration"></div>
+                    <img src="https://images.unsplash.com/photo-1559757175-5700dde675bc?w=600&h=600&fit=crop" 
+                         alt="Technologie IA" class="about-image-main">
+                </div>
+                <div class="about-text">
+                    <h3>Intelligence Artificielle Médicale</h3>
+                    <p>
+                        Notre système utilise des réseaux de neurones profonds entraînés sur des milliers d'images 
+                        dermatologiques validées par des experts. Cette technologie permet une première évaluation 
+                        rapide et fiable de vos lésions cutanées.
+                    </p>
+                    <p>
+                        DermAI ne remplace pas une consultation médicale, mais vous aide à prendre une décision 
+                        éclairée sur la nécessité de consulter un dermatologue.
+                    </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diagnostic Section -->
+        <section class="diagnostic-section section" id="diagnostic">
+            <div class="section-header">
+                <div class="section-badge">Analyse IA</div>
+                <h2 class="section-title">Analyse de la lésion </h2>
+                <p class="section-description">
+                    Téléversez une photo claire de votre lésion cutanée pour obtenir une évaluation préliminaire.
+                </p>
+            </div>
+            <div class="diagnostic-container">
+                <!-- Upload Column -->
+                <div class="upload-column">
+                    <h2>Derm<span class="gradient-text">AI</span></h2>
+                    <p class="upload-subtitle">Commencez votre diagnostic en quelques secondes</p>
+
+                    <label for="file-upload" class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div class="upload-text">Cliquez pour sélectionner une image</div>
+                        <div class="upload-hint">ou glissez-déposez votre photo ici</div>
+                        <input type="file" id="file-upload" accept="image/*" hidden>
+                    </label>
+
+                    <div id="preview-container">
+                        <img id="preview-image" src="" alt="Image prévisualisée">
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-change" id="change-image-button" style="display:none;">
+                            <i class="fas fa-rotate"></i> Changer
+                        </button>
+                        <button class="btn-analyze" id="analyze-button">
+                            <i class="fas fa-wand-magic-sparkles"></i> Analyser
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Column -->
+                <div class="results-column" id="resultsSection">
+                    <div class="result-chart-wrapper">
+                        <div class="donut-chart" id="donutChart" style="--percentage: 0;">
+                            <span class="percentage-display" id="percentageValue">0%</span>
+                        </div>
+                        <div class="result-badge">
+                            <i class="fas fa-sparkles"></i>
+                            <span class="badge-asterisk">*</span>
+                        </div>
+                    </div>
+
+                    <div class="result-bar-container">
+                        <div class="arrow-indicator" id="arrowIndicator">
+                            <div class="arrow-value" id="arrowValue">50%</div>
+                            <div class="arrow-triangle"></div>
+                        </div>
+                        <div class="result-bar">
+                            <span class="result-label">Bénin</span>
+                            <span class="result-label">Malin</span>
+                        </div>
+                        <p class="probability-label">* Probabilité de lésion maligne</p>
+                    </div>
+
+                    <div class="result-disclaimer">
+                        <p>
+                            <i class="fas fa-triangle-exclamation"></i>
+                            <strong>Important :</strong> Cette analyse n'est pas un diagnostic médical officiel. 
+                            Consultez toujours un dermatologue qualifié pour un diagnostic définitif.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conseils Section -->
+        <section class="conseils-section section" id="conseils">
+            <div class="section-header">
+                <div class="section-badge">Recommandations</div>
+                <h2 class="section-title">Conseils Dermatologiques</h2>
+                <p class="section-description">
+                    Adoptez les bonnes pratiques pour protéger votre peau et prévenir les risques.
+                </p>
+            </div>
+            <div class="conseils-grid">
+                <div class="conseil-card">
+                    <div class="conseil-icon"><i class="fas fa-sun"></i></div>
+                    <h3>Protection Solaire</h3>
+                    <p>
+                        Appliquez une protection SPF 30+ quotidiennement. Les UV sont la principale cause 
+                        de vieillissement cutané et de cancers de la peau.
+                    </p>
+                </div>
+                <div class="conseil-card">
+                    <div class="conseil-icon"><i class="fas fa-eye"></i></div>
+                    <h3>Surveillance Régulière</h3>
+                    <p>
+                        Examinez votre peau mensuellement. Notez tout changement dans la taille, forme 
+                        ou couleur de vos grains de beauté.
+                    </p>
+                </div>
+                <div class="conseil-card">
+                    <div class="conseil-icon"><i class="fas fa-user-doctor"></i></div>
+                    <h3>Consultation Annuelle</h3>
+                    <p>
+                        Consultez un dermatologue au moins une fois par an pour un dépistage complet, 
+                        surtout si vous avez des antécédents familiaux.
+                    </p>
+                </div>
+                <div class="conseil-card">
+                    <div class="conseil-icon"><i class="fas fa-droplet"></i></div>
+                    <h3>Hydratation</h3>
+                    <p>
+                        Maintenez votre peau hydratée en buvant suffisamment d'eau et en utilisant 
+                        des crèmes adaptées à votre type de peau.
+                    </p>
+                </div>
+                <div class="conseil-card">
+                    <div class="conseil-icon"><i class="fas fa-heart-pulse"></i></div>
+                    <h3>Mode de Vie Sain</h3>
+                    <p>
+                        Une alimentation équilibrée, un sommeil suffisant et l'évitement du tabac 
+                        contribuent à la santé de votre peau.
+                    </p>
+                </div>
+                <div class="conseil-card">
+                    <div class="conseil-icon"><i class="fas fa-clock"></i></div>
+                    <h3>Réaction Rapide</h3>
+                    <p>
+                        Ne retardez pas une consultation si vous remarquez une lésion qui saigne, 
+                        démange ou change rapidement. La détection précoce sauve des vies.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Section -->
+        <section class="technology-section section">
+            <div class="section-header">
+                <div class="section-badge">Innovation</div>
+                <h2 class="section-title">Comment fonctionne notre IA ?</h2>
+                <p class="section-description">
+                    Découvrez les technologies d'intelligence artificielle qui rendent cette analyse possible.
+                </p>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-icon"><i class="fas fa-brain"></i></div>
+                        <h3>Machine Learning</h3>
+                    </div>
+                    <p>
+                        Le Machine Learning permet aux ordinateurs d'apprendre à partir de données sans être 
+                        explicitement programmés. Notre système s'améliore continuellement en analysant des 
+                        milliers d'images dermatologiques.
+                    </p>
+                    <ul class="tech-features">
+                        <li>Apprentissage à partir de données réelles</li>
+                        <li>Amélioration continue avec l'expérience</li>
+                        <li>Détection de patterns complexes</li>
+                        <li>Prédictions basées sur des milliers d'exemples</li>
+                    </ul>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-icon"><i class="fas fa-network-wired"></i></div>
+                        <h3>Deep Learning</h3>
+                    </div>
+                    <p>
+                        Le Deep Learning utilise des réseaux de neurones artificiels inspirés du cerveau humain. 
+                        Ces réseaux analysent les images en plusieurs couches pour identifier les caractéristiques 
+                        les plus importantes.
+                    </p>
+                    <ul class="tech-features">
+                        <li>Analyse hiérarchique des images</li>
+                        <li>Extraction automatique de caractéristiques</li>
+                        <li>Performance exceptionnelle sur les images</li>
+                        <li>Capacité à traiter des données complexes</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section section" id="contact">
+            <div class="section-header">
+                <div class="section-badge">Nous Contacter</div>
+                <h2 class="section-title">Une question ? Écrivez-nous</h2>
+                <p class="section-description">
+                    Notre équipe est à votre disposition pour répondre à toutes vos questions.
+                </p>
+            </div>
+            <div class="contact-container">
+                <form class="contact-form" id="contact-form">
+                    <div class="form-group">
+                        <label for="name">Nom complet</label>
+                        <input type="text" id="name" name="name" required placeholder="Jean Dupont">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Adresse email</label>
+                        <input type="email" id="email" name="email" required placeholder="jean.dupont@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Sujet</label>
+                        <input type="text" id="subject" name="subject" required placeholder="Votre sujet">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" required placeholder="Votre message..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane"></i> Envoyer le message
+                    </button>
+                </form>
+
+                <div class="contact-info-grid">
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="fas fa-envelope"></i></div>
+                        <h4>Email</h4>
+                        <p>contact@dermai.fr</p>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="fas fa-phone"></i></div>
+                        <h4>Téléphone</h4>
+                        <p>+33 1 23 45 67 89</p>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="fas fa-location-dot"></i></div>
+                        <h4>Adresse</h4>
+                        <p>Paris, France</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">🔬 Derm<span class="gradient-text">AI</span></div>
+        <p>&copy; 2024 DermAI. Tous droits réservés. Cet outil ne remplace pas un diagnostic médical professionnel.</p>
+    </footer>
+
+    <script>
+        // Menu mobile
+        const menuOpenButton = document.getElementById('menu-open-button');
+        const menuCloseButton = document.getElementById('menu-close-button');
+        const navMenu = document.getElementById('navMenu');
+
+        menuOpenButton.addEventListener('click', () => navMenu.classList.add('active'));
+        menuCloseButton.addEventListener('click', () => navMenu.classList.remove('active'));
+
+        // Fermer le menu en cliquant sur un lien
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => navMenu.classList.remove('active'));
+        });
+
+        // Header scroll effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Upload & Analysis
+        const fileInput = document.getElementById('file-upload');
+        const previewImage = document.getElementById('preview-image');
+        const uploadArea = document.getElementById('uploadArea');
+        const changeImageButton = document.getElementById('change-image-button');
+        const analyzeButton = document.getElementById('analyze-button');
+        let resizedImageData = null;
+
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                previewImage.style.display = "none";
+                uploadArea.classList.remove('hidden');
+                changeImageButton.style.display = "none";
+                resizedImageData = null;
+                return;
+            }
+
+            try {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = "block";
+                    uploadArea.classList.add('hidden');
+                    changeImageButton.style.display = "inline-flex";
+                };
+                reader.readAsDataURL(file);
+
+                resizedImageData = await resizeImageForAI(file);
+                console.log("Image prête pour l'IA");
+            } catch (error) {
+                alert("Erreur lors de la lecture de l'image.");
+            }
+        });
+
+        changeImageButton.addEventListener('click', () => {
+            fileInput.value = '';
+            previewImage.style.display = "none";
+            previewImage.src = "";
+            uploadArea.classList.remove('hidden');
+            changeImageButton.style.display = "none";
+            resizedImageData = null;
+        });
+
+        function resizeImageForAI(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 224;
+                    canvas.height = 224;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, 224, 224);
+                    canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
+                };
+            });
+        }
+
+        analyzeButton.addEventListener('click', async () => {
+            if (!fileInput.files[0] || !resizedImageData) {
+                alert("⚠️ Veuillez d'abord sélectionner une image à analyser.");
+                return;
+            }
+
+            analyzeButton.disabled = true;
+            analyzeButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyse en cours...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', resizedImageData, 'image.jpg');
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.error) throw new Error(result.error);
+
+                const malignProbability = result.raw_score * 100;
+                animateResults(malignProbability);
+
+                document.getElementById('resultsSection').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+
+            } catch (error) {
+                alert("Erreur de connexion au serveur. Assurez-vous que le serveur Flask est lancé.");
+            } finally {
+                analyzeButton.disabled = false;
+                analyzeButton.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Analyser';
+            }
+        });
+
+        function animateResults(malignScore) {
+            const percentageValue = document.getElementById('percentageValue');
+            const donutChart = document.getElementById('donutChart');
+            const arrowIndicator = document.getElementById('arrowIndicator');
+            const arrowValue = document.getElementById('arrowValue');
+            
+            let current = 0;
+            const targetScore = Math.round(malignScore);
+            
+            const interval = setInterval(() => {
+                if (current >= targetScore) {
+                    clearInterval(interval);
+                } else {
+                    current += 1;
+                    if (current > targetScore) current = targetScore;
+                    
+                    percentageValue.textContent = current + '%';
+                    donutChart.style.setProperty('--percentage', current);
+                    arrowIndicator.style.left = current + '%';
+                    arrowValue.textContent = current + '%';
+                }
+            }, 15);
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Message envoyé avec succès ! (démo)');
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>
+<!-- Pour lancer le projet et tester l'analyse
+
+1.Ouvrez votre terminal (Recherchez CMD ou PowerShell dans Windows).
+Copiez et collez la commande suivante pour installer les bibliothèques nécessaires :
+pip install flask flask-cors tensorflow pillow numpy
+
+2. Lancement du serveur Flask
+Dans votre terminal, déplacez-vous dans votre dossier de projet :
+cd "C:\Users\mayav\OneDrive\Bureau\DermAI_Final"
+Lancez le serveur avec cette commande dans le terminal :
+python app.py
+Important : Ne fermez pas cette fenêtre. Si vous voyez un message disant Running on http://127.0.0.1:5000, cela signifie que votre IA est "en ligne" sur votre ordinateur.
+
+3. Accès à l'interface Web
+N'ouvrez pas directement le fichier index.html en double-cliquant dessus. Pour que les fonctions d'analyse marchent, vous devez passer par l'adresse générée par Flask.
+
+Ouvrez votre navigateur (Chrome, Edge ou Firefox).
+
+Dans la barre d'adresse, tapez : http://127.0.0.1:5000 et appuyez sur Entrée.

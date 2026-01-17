@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+
+# Environnements
+venv/
+.env
+
+# Modèle IA (NE PAS PUSH)
+model/*.keras
+model/*.h5
+
+# Images temporaires
+predict_temp.jpg
