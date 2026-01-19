@@ -1,7 +1,5 @@
 http://127.0.0.1:5000
 
-Voici un modèle de fichier **README.md** optimisé pour votre projet GitHub. Il est conçu pour présenter de manière professionnelle votre travail d'entraînement IA, tout en précisant que le modèle lui-même n'est pas inclus pour des raisons de poids.
-
 ---
 
 # DermAI - Classification de Lésions Cutanées via CNN (VGG16)
