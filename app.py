@@ -1,69 +1,51 @@
-from flask import Flask, render_template, request, jsonify
+import streamlit as st
 import tensorflow as tf
+import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
-import numpy as np
+from PIL import Image
+import gdown
 import os
 
-app = Flask(__name__)
+# --- CONFIGURATION ---
+# Remplacez ceci par l'ID trouvé dans votre lien Google Drive
+FILE_ID = 'https://drive.google.com/file/d/1S1dYVBf4nrXlTJSAesc33OxVlrUcgb2B/view?usp=sharing'
+MODEL_FILE = 'vgg16_finetuned_janvier.keras'
 
-# Configuration du chemin du modèle (Chemin absolu vers votre bureau)
-MODEL_PATH = r"C:\Users\mayav\OneDrive\Bureau\DermAI_Final\model\vgg16_finetuned_janvier.keras"
+@st.cache_resource
+def load_my_model():
+# Vérifier si le modèle est déjà là, sinon le télécharger
+if not os.path.exists(MODEL_FILE):
+url = f'https://drive.google.com/uc?id={FILE_ID}'
+st.write("Téléchargement du modèle depuis Google Drive... (cela peut prendre une minute)")
+gdown.download(url, MODEL_FILE, quiet=False)
 
-# Chargement du modèle au démarrage
+# Charger le modèle
+model = load_model(MODEL_FILE)
+return model
+
+st.title("Détection Dermatologie AI")
+
 try:
-    model = load_model(MODEL_PATH)
-    print("✅ Modèle chargé avec succès")
+with st.spinner('Chargement du modèle IA en cours...'):
+model = load_my_model()
+st.success("Modèle chargé !")
 except Exception as e:
-    print(f"❌ Erreur lors du chargement du modèle : {e}")
+st.error(f"Erreur : Impossible de charger le modèle. Vérifiez l'ID Google Drive. Détails : {e}")
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# Interface utilisateur
+uploaded_file = st.file_uploader("Choisissez une image...", type=["jpg", "png", "jpeg"])
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    if 'file' not in request.files:
-        return jsonify({'error': 'Aucun fichier reçu'})
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'Fichier vide'})
+if uploaded_file is not None:
+img = Image.open(uploaded_file)
+st.image(img, caption='Image chargée', use_column_width=True)
 
-    # Sauvegarde temporaire de l'image pour l'analyse
-    temp_filename = "predict_temp.jpg"
-    file.save(temp_filename)
-    
-    try:
-        # Prétraitement de l'image (224x224 comme lors de l'entraînement)
-        img = image.load_img(temp_filename, target_size=(224, 224))
-        img_array = image.img_to_array(img) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
-        
-        # Prédiction par le modèle
-        preds = model.predict(img_array)
-        score = float(preds[0][0]) # Probabilité que ce soit malin
-        
-        # Détermination du label et de la confiance
-        if score > 0.5:
-            label = "Maligne (Cancer suspecté)"
-            confidence = score * 100
-        else:
-            label = "Bénigne (Sain)"
-            confidence = (1 - score) * 100
-            
-        return jsonify({
-            'prediction': label,
-            'probability': f"{confidence:.2f}%",
-            'raw_score': score # Utilisé pour l'aiguille de la jauge
-        })
-        
-    except Exception as e:
-        return jsonify({'error': str(e)})
-    finally:
-        # Suppression de l'image temporaire
-        if os.path.exists(temp_filename):
-            os.remove(temp_filename)
+if st.button('Analyser'):
+# Redimensionnement (assurez-vous que 224x224 est la bonne taille pour votre modèle)
+img = img.resize((224, 224))
+img_array = image.img_to_array(img)
+img_array = np.expand_dims(img_array, axis=0)
+# img_array = img_array / 255.0 # Décommentez si nécessaire
 
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+prediction = model.predict(img_array)
+st.write(f"Résultat brut : {prediction}")
