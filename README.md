@@ -42,7 +42,7 @@ Le modèle a été entraîné sous environnement GPU (Google Colab) :
 
 ## 🛠️ Installation et Utilisation (Local)
 
-> **Note importante :** En raison des limitations de taille de GitHub, le fichier du modèle entraîné (`vgg16_finetuned_janvier.keras`) n'est pas inclus dans ce dépôt.
+> **Note importante :** En raison des limitations de taille de GitHub, le fichier du modèle entraîné (`vgg16_finetuned_janvier.keras`) n'est pas inclus dans ce dépôt. Pour lancer l'analyse le propriétaire doit activer le Serveur Flask en local.
 
 Accéder à l'interface via `http://127.0.0.1:5000`.
 
